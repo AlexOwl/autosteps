@@ -1,0 +1,65 @@
+//import { default as pCancelable } from "p-cancelable"
+import delay from "delay"
+
+import { Executable } from "../src/executable"
+
+
+describe("Executable", () => {
+    
+    
+    describe("execute normal", () => {
+        let result: object
+        let promise: Promise<any>
+        let instance: Executable
+        
+        beforeAll(() => {
+            result = {}
+            promise = Promise.resolve(result)
+            instance = new class extends Executable {
+                forceExecute() {
+                    return promise as any
+                }
+            }
+        })
+
+        it("should return promise", () => {
+            const p = instance.execute()
+            expect(p).toBe(promise)
+            expect(p).resolves.toBe(result)
+        })
+
+        it("should not throw error on two executes", () => {
+            instance.execute()
+            expect(instance.execute).not.toThrow()
+            expect(instance.execute()).resolves.toBe(result)
+        })
+    }) 
+
+    describe("execute throw", () => {
+        let reason: Error
+        let promise: Promise<any>
+        let instance: Executable
+        
+        beforeAll(() => {
+            reason = new Error()
+            promise = Promise.reject(reason)
+            instance = new class extends Executable {
+                forceExecute() {
+                    return promise as any
+                }
+            }
+        })
+
+        it("should return promise", () => {
+            const p = instance.execute()
+            expect(p).toBe(promise)
+            expect(p).rejects.toBeDefined()
+        })
+
+        it("should not throw error on two executes", () => {
+            instance.execute()
+            expect(instance.execute).not.toThrow()
+            expect(instance.execute()).rejects.toBeDefined()
+        })
+    })
+})

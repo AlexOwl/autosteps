@@ -1,0 +1,224 @@
+
+import delay from "delay"
+import logSymbols from "log-symbols"
+import { default as termkit } from "terminal-kit"
+const { terminal: term } = termkit
+
+import { DelayStep, PromiseStep } from "./step/index.js"
+import { ConcurrentSteps } from "./steps/index.js"
+
+
+(async () => {
+
+    const steps = new ConcurrentSteps(
+        new ConcurrentSteps([
+            new PromiseStep(
+                "promise", 
+                () => delay(3000),
+                {
+                    getParameters: async (self) => {
+                        console.log("pr", self.options.triesMax, self.options.transactionConfirms, self.context)
+                        return { test1: self.context.test }
+                    },
+                    context: {
+                        test: 1
+                    },
+                    triesMax: 3
+                }
+            ),
+            new DelayStep(
+                "delay", 
+                async ({ delayParameter }) => delayParameter,
+                {
+                    getParameters: async (self) => {
+                        self.logger.log("dl", self.options.triesMax, self.options.transactionConfirms, self.context)
+                        self.logger.log(1)
+                        self.logger.log(2)
+                        self.logger.log(3)
+                        self.logger.log(4)
+                        self.logger.log(5)
+                        return { delayParameter: self.context.delayContext }
+                    },
+                    context: {
+                        delayContext: 3000
+                    }
+                }
+            )
+        ], {
+            context: {
+                test000: 1
+            },
+            triesMax: 7
+        }),
+        {
+            context: {
+                test001: 1
+            },
+            transactionConfirms: 5,
+            triesMax: 10
+        }
+    )
+
+    await steps.execute()
+})()
+
+;(async () => {
+    return
+    term.clear()
+    term.timeout = 1000
+
+
+    var document = term.createDocument()
+
+    const textBox0 = new termkit.TextBox( {
+        parent: document,
+        content: "",
+        contentHasMarkup: true,
+        x: 0,
+        //y: 0,
+        width: 1,
+        height: 1,
+        //lineWrap: true,
+        //wordWrap: true,
+        //scrollable: true,
+        //vScrollBar: !! this.vScrollBar ,
+        //hScrollBar: true,
+        //hiddenContent: this.hiddenContent ,
+        //textAttr ,
+        //voidAttr ,
+        //keyBindings: this.textBoxKeyBindings ,
+    })
+
+    const textBox = new termkit.TextBox( {
+        parent: document,
+        content: "wfejiofhueiwfbwfejiofhueiwfbueibfchebwfejiofhueiwfbueibfchebwfejiofhueiwfbueibfchebwfejiofhueiwfbueibfchebueibfcheb",
+        contentHasMarkup: true,
+        x: 2,
+        //y: 0,
+        width: 13,
+        //height: 5,
+        lineWrap: true,
+        //wordWrap: true,
+        scrollable: true,
+        //vScrollBar: true,
+        //hScrollBar: true,
+        //hiddenContent: this.hiddenContent ,
+        //textAttr ,
+        //voidAttr ,
+        //keyBindings: this.textBoxKeyBindings ,
+    })
+
+
+    const textBox1 = new termkit.TextBox( {
+        parent: document,
+        content: "c8eyf89deh9fhcevuirbveube",
+        contentHasMarkup: true,
+        x: 16,
+        //y: 0,
+        width: 20,
+        //lineWrap: true,
+        //wordWrap: true,
+        scrollable: true,
+        //vScrollBar: !! this.vScrollBar ,
+        //hScrollBar: !! this.hScrollBar ,
+        //hiddenContent: this.hiddenContent ,
+        //textAttr ,
+        //voidAttr ,
+        //keyBindings: this.textBoxKeyBindings ,
+    })
+
+    var button1 = new termkit.Button( {
+        parent: document,
+        content: '▼',
+        blurAttr: { bgColor: "default" },
+        focusAttr: { color: "black", bgColor: "white" },
+        contentHasMarkup: true,
+        value: 'b1' ,
+        x: 37,
+    })
+
+    let i = 1;
+    button1.on("blinked", () => textBox1.setContent((++i).toString())) ;
+    
+
+   // textTable.setCellContent(1, 1, "111")
+
+    //console.log(document.elements)
+
+    const spinner = await termkit.terminal.spinner({
+        parent: textBox0,
+        animation: "asciiSpinner",
+        contentHasMarkup: true,
+        paddingHasMarkup: true,
+        attr: {
+            bgColor: null,
+            color: "blue"
+        },
+        //fit: true
+        x: 1,
+        y: 1
+    })
+
+    /*await term.createInlineElement(termkit.Text , {
+		content: "Hello",
+        attr: {
+            bgColor: null
+        },
+		//x: 1 , y: 1 ,
+		//width: 70 ,
+		//height: 20 ,
+		fit: true
+	})*/
+    /*const status = new termkit.Text( {
+        parent: document.elements.name,
+        content: "Hello",
+        attr: {
+            bgColor: null
+        },
+    })*/
+
+    /*const status = new termkit.Text( {
+        parent: document,
+        x: 2,
+        content: "Hello",
+        attr: {
+            bgColor: null
+        },
+    })*/
+    //status.setContent("Hello2")
+
+    /*term.saveCursor()
+
+    await delay(3000)
+
+    status.setContent("Test0")
+
+    spinner.animate(false)
+
+    spinner.setContent("^bℹ^", true)
+
+    await delay(1000)
+
+    spinner.setContent("^g✔^", true)
+
+    await delay(1000)
+
+    spinner.setContent("^y⚠^", true)
+
+    await delay(1000)
+
+    spinner.setContent("^r✖^", true)
+
+    term.restoreCursor()*/
+
+    term.on("key", (key: string) => {
+        switch(key) {
+            case "CTRL_C":
+                term.styleReset()
+                term.clear()
+                process.exit()
+        }
+    })
+
+
+})()
